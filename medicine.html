@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Medicine Reminder App</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #333;
+    }
+    .container {
+      background: #fff;
+      padding: 25px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      width: 380px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 1.6rem;
+      color: #0077ff;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 14px;
+      width: 100%;
+    }
+    input {
+      background: #f3f3f3;
+    }
+    button {
+      background: #0077ff;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #005fcc;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 15px;
+      text-align: left;
+    }
+    li {
+      background: #f9f9f9;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+    .alert {
+      display: none;
+      margin-top: 15px;
+      padding: 10px;
+      background: #ffcccc;
+      color: #cc0000;
+      border-radius: 10px;
+      font-weight: bold;
+      animation: shake 0.5s infinite;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💊 Medicine Reminder</h1>
+    <input type="text" id="medicineName" placeholder="Enter medicine name">
+    <input type="time" id="medicineTime">
+    <button onclick="addMedicine()">Add Reminder</button>
+
+    <ul id="medicineList"></ul>
+    <div class="alert" id="alertBox">⏰ Time to take your medicine!</div>
+  </div>
+
+  <audio id="alarmSound">
+    <source src="https://www.soundjay.com/button/beep-07.wav" type="audio/wav">
+  </audio>
+
+  <script>
+    const medicineList = document.getElementById("medicineList");
+    const alertBox = document.getElementById("alertBox");
+    const alarmSound = document.getElementById("alarmSound");
+    let reminders = [];
+
+    function addMedicine() {
+      const name = document.getElementById("medicineName").value;
+      const time = document.getElementById("medicineTime").value;
+
+      if (name && time) {
+        reminders.push({ name, time });
+        renderList();
+        document.getElementById("medicineName").value = "";
+        document.getElementById("medicineTime").value = "";
+      } else {
+        alert("Please fill both fields!");
+      }
+    }
+
+    function renderList() {
+      medicineList.innerHTML = "";
+      reminders.forEach((med, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <span>💊 ${med.name} - ${med.time}</span>
+          <button onclick="removeMedicine(${index})">❌</button>
+        `;
+        medicineList.appendChild(li);
+      });
+    }
+
+    function removeMedicine(index) {
+      reminders.splice(index, 1);
+      renderList();
+    }
+
+    function checkReminders() {
+      const now = new Date();
+      const current = now.getHours().toString().padStart(2, "0") + ":" +
+                      now.getMinutes().toString().padStart(2, "0");
+      reminders.forEach(med => {
+        if (med.time === current) {
+          alertBox.style.display = "block";
+          alarmSound.play();
+          setTimeout(() => {
+            alertBox.style.display = "none";
+          }, 10000);
+        }
+      });
+    }
+
+    setInterval(checkReminders, 60000); // check every 1 min
+  </script>
+</body>
+</html>
